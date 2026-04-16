@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Amazon Creators preview</title>
+    <style>
+      /*
+       * Fixed-size preview window (see VIEWER_WIDTH / VIEWER_HEIGHT in
+       * viewer-client.ts). Product cards can legitimately be taller than the
+       * preview; we scroll inside #preview rather than letting the viewer
+       * balloon the host's panel. Paste-ready HTML (content[0].text) is
+       * unchanged — this sizing applies ONLY to the in-host preview.
+       */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        width: 880px;
+        height: 245px;
+        overflow: hidden;
+      }
+      #preview {
+        display: block;
+        width: 880px;
+        height: 245px;
+        border: 0;
+        background: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- The tool's rendered HTML lives in a nested iframe (srcdoc) so its
+         styles stay sandboxed away from this shell. Our <script> keeps
+         running after the tool result arrives, so the App instance can
+         continue reporting size changes to the host. -->
+    <iframe id="preview" sandbox="allow-same-origin" scrolling="auto"></iframe>
+    <script type="module">
+      /* __VIEWER_CLIENT__ */
+    </script>
+  </body>
+</html>
