@@ -38,10 +38,8 @@ An MCP server wrapping the Amazon Creators API (the REST API that replaces PA-AP
 - Use `console.error` for logs — stdout is reserved for JSON-RPC.
 - Tokens are cached in-memory until 60s before `expires_in`; refresh on demand.
 
-## Houtini workflow reminders
-- All files under `C:\mcp` mirror to `\\hopper\d\MCP` — remember to sync if asking houtini-lm to review.
-- Repo lives at `houtini-ai/amazon-creators-mcp`, publishes as `@houtini/amazon-creators-mcp`.
-- README must include the houtini badge row + Glama card (see `C:\MCP\CLAUDE.md`).
+## Project facts
+- Repo: `houtini-ai/amazon-creators-mcp`. Publishes as `@houtini/amazon-creators-mcp`.
 
 ## When modifying tools
 1. Update the tool's input/output zod schemas first.

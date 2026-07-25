@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="904" height="440" viewBox="0 0 904 440" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <!-- page -->
+  <rect width="904" height="440" fill="#f3f4f6"/>
+
+  <!-- soft card shadows (manual, so GitHub's SVG sanitiser can't strip them) -->
+  <rect x="32" y="35" width="280" height="354" rx="12" fill="#0f172a" opacity="0.06"/>
+  <rect x="328" y="35" width="280" height="354" rx="12" fill="#0f172a" opacity="0.06"/>
+  <rect x="624" y="35" width="280" height="354" rx="12" fill="#0f172a" opacity="0.06"/>
+
+  <!-- ================= CARD 1 ================= -->
+  <g>
+    <rect x="32" y="32" width="280" height="354" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+    <!-- image -->
+    <rect x="48" y="48" width="248" height="150" rx="6" fill="#eef2f7"/>
+    <circle cx="172" cy="118" r="40" fill="none" stroke="#c2ccd8" stroke-width="10"/>
+    <circle cx="172" cy="118" r="7" fill="#c2ccd8"/>
+    <text x="172" y="182" font-size="11" fill="#9aa6b3" text-anchor="middle">Amazon product photo</text>
+    <!-- title -->
+    <text x="48" y="224" font-size="16" font-weight="600" fill="#111827">Fanatec CSL DD Direct Drive</text>
+    <text x="48" y="244" font-size="16" font-weight="600" fill="#111827">Wheel Base (5 Nm)</text>
+    <!-- meta -->
+    <text x="48" y="270" font-size="13" fill="#4b5563">Fanatec  ·  4.7★ (1,284 reviews)</text>
+    <!-- price + timestamp -->
+    <text x="48" y="298" font-size="20" font-weight="700" fill="#111827">£349.95</text>
+    <text x="132" y="298" font-size="11" fill="#9ca3af">· as of 20 Jul 2026, 15:24 UTC</text>
+    <!-- savings -->
+    <text x="48" y="320" font-size="13" fill="#b91c1c">save £40.00 (10% off)</text>
+    <!-- CTA -->
+    <rect x="48" y="332" width="124" height="40" rx="8" fill="#ffd814" stroke="#fcd200"/>
+    <text x="110" y="357" font-size="14" font-weight="600" fill="#0f1111" text-anchor="middle">View on Amazon</text>
+  </g>
+
+  <!-- ================= CARD 2 ================= -->
+  <g>
+    <rect x="328" y="32" width="280" height="354" rx="12" fill="#ffffff" stroke="#e5e7eb" filter="url(#cardShadow)"/>
+    <rect x="344" y="48" width="248" height="150" rx="6" fill="#eef2f7"/>
+    <circle cx="468" cy="118" r="40" fill="none" stroke="#c2ccd8" stroke-width="10"/>
+    <circle cx="468" cy="118" r="7" fill="#c2ccd8"/>
+    <text x="468" y="182" font-size="11" fill="#9aa6b3" text-anchor="middle">Amazon product photo</text>
+    <text x="344" y="224" font-size="16" font-weight="600" fill="#111827">Moza R5 Direct Drive Bundle</text>
+    <text x="344" y="244" font-size="16" font-weight="600" fill="#111827">with Wheel and Pedals</text>
+    <text x="344" y="270" font-size="13" fill="#4b5563">Moza Racing  ·  4.6★ (612 reviews)</text>
+    <text x="344" y="298" font-size="20" font-weight="700" fill="#111827">£469.00</text>
+    <text x="428" y="298" font-size="11" fill="#9ca3af">· as of 20 Jul 2026, 15:24 UTC</text>
+    <rect x="344" y="332" width="124" height="40" rx="8" fill="#ffd814" stroke="#fcd200"/>
+    <text x="406" y="357" font-size="14" font-weight="600" fill="#0f1111" text-anchor="middle">View on Amazon</text>
+  </g>
+
+  <!-- ================= CARD 3 ================= -->
+  <g>
+    <rect x="624" y="32" width="280" height="354" rx="12" fill="#ffffff" stroke="#e5e7eb" filter="url(#cardShadow)"/>
+    <rect x="640" y="48" width="248" height="150" rx="6" fill="#eef2f7"/>
+    <circle cx="764" cy="118" r="40" fill="none" stroke="#c2ccd8" stroke-width="10"/>
+    <circle cx="764" cy="118" r="7" fill="#c2ccd8"/>
+    <text x="764" y="182" font-size="11" fill="#9aa6b3" text-anchor="middle">Amazon product photo</text>
+    <text x="640" y="224" font-size="16" font-weight="600" fill="#111827">Cammus C5 Compact Direct</text>
+    <text x="640" y="244" font-size="16" font-weight="600" fill="#111827">Drive Wheel Base</text>
+    <text x="640" y="270" font-size="13" fill="#4b5563">Cammus  ·  4.4★ (208 reviews)</text>
+    <text x="640" y="298" font-size="20" font-weight="700" fill="#111827">£399.00</text>
+    <text x="724" y="298" font-size="11" fill="#9ca3af">· as of 20 Jul 2026, 15:24 UTC</text>
+    <text x="640" y="320" font-size="13" fill="#b91c1c">save £30.00 (7% off)</text>
+    <rect x="640" y="332" width="124" height="40" rx="8" fill="#ffd814" stroke="#fcd200"/>
+    <text x="702" y="357" font-size="14" font-weight="600" fill="#0f1111" text-anchor="middle">View on Amazon</text>
+  </g>
+
+  <!-- disclosure -->
+  <text x="32" y="414" font-size="11" fill="#6b7280">As an Amazon Associate we earn from qualifying purchases. Prices and availability are accurate as of the time shown and are subject to change.</text>
+</svg>

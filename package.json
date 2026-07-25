@@ -1,6 +1,6 @@
 {
   "name": "@houtini/amazon-creators-mcp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Amazon Creators API MCP Server — blog-friendly affiliate product embeds rendered inline via MCP Apps.",
   "type": "module",
   "main": "./dist/index.js",
@@ -10,6 +10,8 @@
   },
   "files": [
     "dist",
+    "images",
+    "houtini-logo.png",
     "README.md",
     "LICENSE"
   ],
@@ -59,12 +61,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/houtini-ai/amazon-creators-api-mcp.git"
+    "url": "git+https://github.com/houtini-ai/amazon-creators-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/houtini-ai/amazon-creators-api-mcp/issues"
+    "url": "https://github.com/houtini-ai/amazon-creators-mcp/issues"
   },
-  "homepage": "https://github.com/houtini-ai/amazon-creators-api-mcp#readme",
+  "homepage": "https://github.com/houtini-ai/amazon-creators-mcp#readme",
   "author": "Houtini AI",
   "license": "MIT",
   "publishConfig": {

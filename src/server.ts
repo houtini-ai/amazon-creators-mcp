@@ -70,7 +70,7 @@ export function buildServer(): McpServer {
 
   const server = new McpServer({
     name: 'amazon-creators',
-    version: '0.3.0',
+    version: '0.3.1',
   });
 
   // Register the single viewer resource all tools share.
