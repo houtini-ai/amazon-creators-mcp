@@ -15,6 +15,7 @@ import { loadConfig } from './config/env.js';
 import { TokenCache } from './auth/token-cache.js';
 import { CreatorsApiClient } from './client/creators-api.js';
 import { registerViewerResource, VIEWER_RESOURCE_URI } from './mcp-apps/register.js';
+import { SERVER_VERSION } from './version.js';
 import {
   SEARCH_ITEMS_TOOL_NAME,
   SEARCH_ITEMS_DESCRIPTION,
@@ -70,7 +71,7 @@ export function buildServer(): McpServer {
 
   const server = new McpServer({
     name: 'amazon-creators',
-    version: '0.3.1',
+    version: SERVER_VERSION,
   });
 
   // Register the single viewer resource all tools share.

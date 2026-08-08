@@ -1,6 +1,6 @@
-<p align="center">
-  <img src="houtini-logo.png" alt="Houtini" width="120" />
-</p>
+<div align="center">
+  <img src="https://raw.githubusercontent.com/houtini-ai/amazon-creators-mcp/main/assets/logo.png" width="120" height="120" alt="Amazon Creators MCP" />
+</div>
 
 # Amazon Creators API MCP - paste-ready affiliate product cards, straight from a chat
 
@@ -8,7 +8,7 @@
 [![MCP Registry](https://img.shields.io/badge/MCP-Registry-blue?style=flat-square)](https://registry.modelcontextprotocol.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Known Vulnerabilities](https://snyk.io/test/github/houtini-ai/amazon-creators-api-mcp/badge.svg)](https://snyk.io/test/github/houtini-ai/amazon-creators-api-mcp)
+[![Known Vulnerabilities](https://snyk.io/test/github/houtini-ai/amazon-creators-mcp/badge.svg)](https://snyk.io/test/github/houtini-ai/amazon-creators-mcp)
 
 If you write product round-ups, you already know the boring part. You find the product on Amazon, copy the image, grab the price, paste your affiliate link, and hope the price hasn't moved by the time someone reads the post. Then you do it again for the next nine products.
 
@@ -38,7 +38,7 @@ You don't need to know what an API is to use it - if you can add an MCP server t
 
 ---
 
-## How you'll actually use it
+## How you'll use it
 
 The whole thing is built around a conversation, not a form. You describe what you're writing about, Claude searches and summarises, and it only spits out HTML when you actually ask for the embed. Here's the shape of it.
 
