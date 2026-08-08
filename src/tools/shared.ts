@@ -6,10 +6,11 @@ import type { AppConfig } from '../config/env.js';
 import type { CreatorsApiClient } from '../client/creators-api.js';
 import { formatJson } from '../formatters/json.js';
 import { formatHtmlCard, formatHtmlGrid } from '../formatters/html.js';
+import { formatDealsSection } from '../formatters/deals.js';
 import { HTML_FORMATS, type FormatterInput, type FormatterOutput, type OutputFormat } from '../formatters/types.js';
 import type { SearchItemsResponse, GetItemsResponse, GetVariationsResponse } from '../types/creators.js';
 
-export const FORMAT_OPTIONS = ['json', 'markdown', 'html-card', 'html-grid'] as const;
+export const FORMAT_OPTIONS = ['json', 'markdown', 'html-card', 'html-grid', 'html-deals'] as const;
 
 export const VALID_RESOURCES = [
   'browseNodeInfo.browseNodes',
@@ -238,6 +239,8 @@ export function renderToolOutput<TResponse extends ItemBearingResponse>(
 
   if (format === 'json') return toMcpResult(formatJson(input));
   if (format === 'markdown') return toMcpResult(markdownFormatter(input));
+
+  if (format === 'html-deals') return toMcpResult(formatDealsSection(input));
 
   const out = format === 'html-card' ? formatHtmlCard(input) : formatHtmlGrid(input);
   return toMcpResult(out);

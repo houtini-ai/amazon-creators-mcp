@@ -1,10 +1,10 @@
 /**
  * Shared types for formatter output.
  */
-export type OutputFormat = 'json' | 'markdown' | 'html-card' | 'html-grid';
+export type OutputFormat = 'json' | 'markdown' | 'html-card' | 'html-grid' | 'html-deals';
 
 /** Formats that render HTML and should be wrapped as an MCP UI resource. */
-export const HTML_FORMATS: ReadonlyArray<OutputFormat> = ['html-card', 'html-grid'];
+export const HTML_FORMATS: ReadonlyArray<OutputFormat> = ['html-card', 'html-grid', 'html-deals'];
 
 export interface FormatterInput<TResponse> {
   response: TResponse;

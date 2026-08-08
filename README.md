@@ -216,9 +216,35 @@ The four Amazon-facing tools all take:
 
 ---
 
+## Deal rows that match your site, not the tool
+
+The formats below all produce a card that looks like a card. That's right for a one-off embed and wrong the moment you drop it into a post that already has house styling - you end up with somebody else's design sitting in the middle of your article.
+
+`html-deals` emits structural markup instead: `.amazon-deals-section` wrapping one `.amazon-deal-row` per product. If your theme already defines those classes, the output inherits them and there's nothing to restyle. If it doesn't, pass `includeCss: true` and you get a sensible default:
+
+![A row of three product deals - thumbnail, title, brand, price, savings and a View on Amazon button, in a compact 70px row](https://raw.githubusercontent.com/houtini-ai/amazon-creators-mcp/main/assets/deals-row-output.png)
+
+```
+Find me three burr coffee grinders and give me deal rows for the post
+```
+
+Each row is a fixed 70px so ten products read as a scannable list rather than ten screens of scrolling. Feature bullets are off by default for the same reason - set `featureCount` if you want them, and unset the row's `max-height` in your own CSS to make room.
+
+Two things it will not print:
+
+- **A Prime badge.** Nothing in the Creators API response says whether an item is Prime-eligible, so claiming it would be inventing a delivery promise on a page someone might buy from.
+- **Empty stars.** Review data is [restricted per Associates account](#a-note-on-star-ratings); where Amazon returns none, the rating line is dropped rather than rendered as zero.
+
+### A note on star ratings
+
+`customerReviews.starRating` and `customerReviews.count` are requested on every call, but Amazon only returns them for accounts eligible for that data. If your rows have no stars, that's the account, not the tool - the fields are being asked for correctly and the formatter degrades rather than inventing a number.
+
+---
+
 ## Output formats
 
 - **`markdown`** - image, linked title, price, disclosure. Drops straight into a blog editor. Full untruncated titles.
+- **`html-deals`** - structural deal rows that inherit your site's CSS. See above. The one to use for articles.
 - **`html-card`** - one self-contained `<article class="amzn-card">` with its styles inlined. Title capped at `titleMaxChars`. If there's no price, it renders a muted "Check price on Amazon" link so the card still has somewhere to click.
 - **`html-grid`** - a responsive grid of those cards for a search or a list. No-price items dropped by default.
 - **`json`** - the parsed response, pretty-printed. For when you want to see what Amazon actually sent.
