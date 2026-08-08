@@ -6,19 +6,21 @@
     {
       "src": "https://raw.githubusercontent.com/houtini-ai/amazon-creators-mcp/main/assets/logo.png",
       "mimeType": "image/png",
-      "sizes": ["512x512"]
+      "sizes": [
+        "512x512"
+      ]
     }
   ],
   "repository": {
     "url": "https://github.com/houtini-ai/amazon-creators-mcp",
     "source": "github"
   },
-  "version": "0.3.1",
+  "version": "0.3.2",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@houtini/amazon-creators-mcp",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "transport": {
         "type": "stdio"
       },
