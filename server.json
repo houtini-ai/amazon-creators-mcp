@@ -1,0 +1,71 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.houtini-ai/amazon-creators",
+  "description": "Find Amazon products and get back paste-ready affiliate cards - image, price, rating and your tag - previewed inline in Claude Desktop through MCP Apps",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/houtini-ai/amazon-creators-mcp/main/assets/logo.png",
+      "mimeType": "image/png",
+      "sizes": ["512x512"]
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/houtini-ai/amazon-creators-mcp",
+    "source": "github"
+  },
+  "version": "0.3.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@houtini/amazon-creators-mcp",
+      "version": "0.3.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "AMAZON_CLIENT_ID",
+          "description": "Amazon Creators API client ID",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true
+        },
+        {
+          "name": "AMAZON_CLIENT_SECRET",
+          "description": "Amazon Creators API client secret",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true
+        },
+        {
+          "name": "AMAZON_PARTNER_TAG",
+          "description": "Your Amazon Associates partner tag, baked into every generated link",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AMAZON_CREDENTIAL_VERSION",
+          "description": "Credential version issued with your Creators API keys, e.g. 3.1",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AMAZON_MARKETPLACE",
+          "description": "Marketplace host, e.g. www.amazon.com or www.amazon.co.uk",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AMAZON_MAX_CONCURRENCY",
+          "description": "Maximum concurrent API requests (optional, defaults to 4)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

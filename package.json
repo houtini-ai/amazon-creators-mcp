@@ -13,6 +13,7 @@
     "images",
     "assets/logo.png",
     "assets/icon.png",
+    "server.json",
     "README.md",
     "LICENSE"
   ],
@@ -72,5 +73,6 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "mcpName": "io.github.houtini-ai/amazon-creators"
 }
