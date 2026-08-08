@@ -1,6 +1,6 @@
 {
   "name": "@houtini/amazon-creators-mcp",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Amazon Creators API MCP Server — blog-friendly affiliate product embeds rendered inline via MCP Apps.",
   "type": "module",
   "main": "./dist/index.js",

@@ -9,3 +9,6 @@ coverage/
 .vscode/
 .idea/
 .claude/
+
+# Local Claude working notes - internal, never published
+CLAUDE.md
