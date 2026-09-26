@@ -6,6 +6,8 @@
  * postMessage, listens for `ui/notifications/tool-result`, and renders the
  * tool's HTML (or markdown/json fallback) inside a nested same-origin iframe
  * so the rendered content's CSS can't leak into — or read from — our shell.
+ * Embeddable fragments (`html-deals`) are wrapped in a preview-only document,
+ * and a "Copy HTML" button puts the embeddable markup on the clipboard.
  *
  * Why a nested iframe with `srcdoc` rather than `document.write`:
  *   `document.write` destroys the top-level DOM, which kills the `App`
@@ -18,6 +20,7 @@
  * served by `registerAppResource` at runtime.
  */
 import { App, PostMessageTransport } from '@modelcontextprotocol/ext-apps';
+import { classifyOutput, extractEmbeddable, fragmentPreviewDoc } from './preview-doc.js';
 
 type ContentBlock = { type: string; text?: string } & Record<string, unknown>;
 type ToolResult = {
@@ -25,8 +28,6 @@ type ToolResult = {
   structuredContent?: Record<string, unknown>;
   isError?: boolean;
 };
-
-const HTML_MARKER = /^\s*<!doctype\s+html|^\s*<html[\s>]/i;
 
 /**
  * Target preview dimensions. Claude Desktop's MCP Apps preview slot is
@@ -65,6 +66,58 @@ function emptyDoc(message: string): string {
   </style></head><body>${escapeHtml(message)}</body></html>`;
 }
 
+/** The markup the copy button hands over; empty when the output isn't HTML. */
+let copyPayload = '';
+
+function setCopyVisible(visible: boolean): void {
+  const button = document.getElementById('copy') as HTMLButtonElement | null;
+  if (button) button.hidden = !visible;
+}
+
+/**
+ * Write to the clipboard. The async Clipboard API needs the `clipboard-write`
+ * permission, which the host grants from our resource's
+ * `_meta.ui.permissions.clipboardWrite`; hosts that don't honour it still
+ * allow `execCommand('copy')` on a user gesture, so fall back to that.
+ */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    let ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch {
+      ok = false;
+    }
+    area.remove();
+    return ok;
+  }
+}
+
+function wireCopyButton(): void {
+  const button = document.getElementById('copy') as HTMLButtonElement | null;
+  if (!button) return;
+  const label = button.textContent ?? 'Copy HTML';
+  let reset: ReturnType<typeof setTimeout> | undefined;
+  button.addEventListener('click', () => {
+    if (!copyPayload) return;
+    void copyText(copyPayload).then((ok) => {
+      button.textContent = ok ? 'Copied' : 'Copy failed';
+      clearTimeout(reset);
+      reset = setTimeout(() => (button.textContent = label), 1500);
+    });
+  });
+}
+
 /** Render a tool result into the preview frame. */
 function render(params: ToolResult): void {
   const frame = document.getElementById('preview') as HTMLIFrameElement | null;
@@ -75,14 +128,24 @@ function render(params: ToolResult): void {
   const isError = params.isError === true;
 
   if (!text) {
+    copyPayload = '';
+    setCopyVisible(false);
     frame.srcdoc = emptyDoc(isError ? 'Tool reported an error (no content).' : 'No content returned.');
     return;
   }
 
-  frame.srcdoc = HTML_MARKER.test(text) ? text : fallbackDoc(text, isError);
+  const kind = isError ? 'text' : classifyOutput(text);
+  copyPayload = kind === 'text' ? '' : extractEmbeddable(text);
+  setCopyVisible(copyPayload !== '');
+
+  if (kind === 'document') frame.srcdoc = text;
+  else if (kind === 'fragment') frame.srcdoc = fragmentPreviewDoc(text);
+  else frame.srcdoc = fallbackDoc(text, isError);
 }
 
 async function main(): Promise<void> {
+  wireCopyButton();
+
   // `autoResize: false` — we explicitly pin the preview to VIEWER_WIDTH ×
   // VIEWER_HEIGHT rather than letting the ResizeObserver report every
   // content reflow to the host. The host's preview slot is a fixed size and

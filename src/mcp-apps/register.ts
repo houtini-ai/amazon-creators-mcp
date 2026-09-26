@@ -65,7 +65,12 @@ export function buildViewerContents(html?: string): {
     uri: string;
     mimeType: string;
     text: string;
-    _meta: { ui: { csp: { resourceDomains: string[]; connectDomains: string[] } } };
+    _meta: {
+      ui: {
+        csp: { resourceDomains: string[]; connectDomains: string[] };
+        permissions: { clipboardWrite: Record<string, never> };
+      };
+    };
   }>;
 } {
   return {
@@ -80,6 +85,8 @@ export function buildViewerContents(html?: string): {
               resourceDomains: [...AMAZON_IMAGE_ORIGINS],
               connectDomains: [...AMAZON_IMAGE_ORIGINS],
             },
+            // The viewer's "Copy HTML" button uses the async Clipboard API.
+            permissions: { clipboardWrite: {} },
           },
         },
       },

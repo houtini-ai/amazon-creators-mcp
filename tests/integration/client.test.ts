@@ -110,6 +110,67 @@ describe('CreatorsApiClient integration', () => {
     expect(call).toBe(2);
   });
 
+  it('gives up after a bounded number of 429s instead of retrying forever', async () => {
+    let call = 0;
+    server.use(
+      tokenHandler(),
+      http.post(SEARCH_URL, () => {
+        call += 1;
+        return new HttpResponse(null, { status: 429, headers: { 'retry-after': '1' } });
+      }),
+    );
+
+    vi.useFakeTimers({ toFake: ['setTimeout'] });
+    const tokens = new TokenCache(config);
+    const client = new CreatorsApiClient(config, tokens);
+    const p = client.call('searchItems', { keywords: 'x' });
+    const assertion = expect(p).rejects.toThrow(/Rate limited by Amazon on searchItems.*gave up after 3 retries/);
+    for (let i = 0; i < 10; i += 1) await vi.advanceTimersByTimeAsync(1000);
+    await assertion;
+    vi.useRealTimers();
+    // The first request plus three retries.
+    expect(call).toBe(4);
+  });
+
+  it('fails a 429 immediately when Retry-After is longer than it will wait', async () => {
+    let call = 0;
+    server.use(
+      tokenHandler(),
+      http.post(SEARCH_URL, () => {
+        call += 1;
+        return new HttpResponse(null, { status: 429, headers: { 'retry-after': '3600' } });
+      }),
+    );
+    const tokens = new TokenCache(config);
+    const client = new CreatorsApiClient(config, tokens);
+    await expect(client.call('searchItems', { keywords: 'x' })).rejects.toThrow(/Retry-After 3600s/);
+    expect(call).toBe(1);
+  });
+
+  it('retries once on a 5xx whose body is not JSON (gateway error page)', async () => {
+    let call = 0;
+    server.use(
+      tokenHandler(),
+      http.post(SEARCH_URL, () => {
+        call += 1;
+        if (call === 1) {
+          return new HttpResponse('<html><body>502 Bad Gateway</body></html>', {
+            status: 502,
+            headers: { 'content-type': 'text/html' },
+          });
+        }
+        return HttpResponse.json({ searchResult: { items: [{ asin: 'B3' }] } });
+      }),
+    );
+    const tokens = new TokenCache(config);
+    const client = new CreatorsApiClient(config, tokens);
+    const result = (await client.call('searchItems', { keywords: 'x' })) as {
+      searchResult: { items: Array<{ asin: string }> };
+    };
+    expect(result.searchResult.items[0]!.asin).toBe('B3');
+    expect(call).toBe(2);
+  });
+
   it('surfaces partial-failure responses (items + errors)', async () => {
     server.use(
       tokenHandler(),

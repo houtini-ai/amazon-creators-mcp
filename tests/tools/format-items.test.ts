@@ -117,6 +117,87 @@ describe('runFormatItems', () => {
     expect(html).toContain('<time datetime="2026-04-16T14:34:00Z">16 Apr 2026, 14:34 UTC</time>');
   });
 
+  it('converts an offset retrievedAt to UTC before labelling it UTC', async () => {
+    const result = await runFormatItems(deps, {
+      items: [ITEM],
+      format: 'html-card',
+      retrievedAt: '2026-04-16T09:00:00-07:00',
+    });
+    const html = (result.content[0] as { text: string }).text;
+    expect(html).toContain('<time datetime="2026-04-16T16:00:00Z">16 Apr 2026, 16:00 UTC</time>');
+
+    const md = await runFormatItems(deps, {
+      items: [ITEM],
+      format: 'markdown',
+      retrievedAt: '2026-04-16T09:00:00-07:00',
+    });
+    expect((md.content[0] as { text: string }).text).toContain('16 Apr 2026, 16:00 UTC');
+  });
+
+  it('shows the html-deals "Checked" date as the UTC day', async () => {
+    const result = await runFormatItems(deps, {
+      items: [ITEM],
+      format: 'html-deals',
+      retrievedAt: '2026-04-16T23:30:00-07:00',
+    });
+    expect((result.content[0] as { text: string }).text).toContain('Checked 17 April 2026.');
+  });
+
+  it('html-deals structuredContent round-trips back into format_items', async () => {
+    const first = await runFormatItems(deps, { items: [ITEM], format: 'html-deals' });
+    const again = await runFormatItems(deps, {
+      response: first.structuredContent,
+      format: 'html-deals',
+    });
+    expect((again.content[0] as { text: string }).text).toContain('Echo Show 5');
+  });
+
+  it('html-deals structuredContent keeps unpriced items and API errors', async () => {
+    const response = {
+      itemsResult: { items: [ITEM, { asin: 'B000NOPRICE', itemInfo: { title: { displayValue: 'No price' } } }] },
+      errors: [{ code: 'ItemNotAccessible', message: 'gone', asin: 'B0GONE' }],
+    };
+    const { formatDealsSection } = await import('../../src/formatters/deals.js');
+    const out = formatDealsSection({ response, marketplace: 'www.amazon.com', partnerTag: 'tag-20' });
+    expect(out.structured).toBe(response);
+    expect(out.text).not.toContain('No price');
+  });
+
+  it('emits customStyles for html-deals without the full stylesheet', async () => {
+    const result = await runFormatItems(deps, {
+      items: [ITEM],
+      format: 'html-deals',
+      customStyles: '.amazon-buy-button { background: hotpink; }',
+    });
+    const text = (result.content[0] as { text: string }).text;
+    expect(text).toMatch(/^<style>\n\.amazon-buy-button \{ background: hotpink; \}\n<\/style>\n<div class="amazon-deals-section">/);
+  });
+
+  it('emits the deals stylesheet when includeCss is set', async () => {
+    const bare = await runFormatItems(deps, { items: [ITEM], format: 'html-deals' });
+    const styled = await runFormatItems(deps, {
+      items: [ITEM],
+      format: 'html-deals',
+      includeCss: true,
+      customStyles: '.x { color: red; }',
+    });
+    expect((bare.content[0] as { text: string }).text.startsWith('<div')).toBe(true);
+    const text = (styled.content[0] as { text: string }).text;
+    expect(text).toContain('.amazon-deals-section {');
+    // customStyles comes after the defaults so it wins the cascade.
+    expect(text.indexOf('.x { color: red; }')).toBeGreaterThan(text.indexOf('.amazon-deals-section {'));
+  });
+
+  it('threads featureCount into html-deals rows', async () => {
+    const item = { ...ITEM, itemInfo: { ...ITEM.itemInfo, features: { displayValues: ['Loud', 'Small', 'Blue'] } } };
+    const none = await runFormatItems(deps, { items: [item], format: 'html-deals' });
+    const two = await runFormatItems(deps, { items: [item], format: 'html-deals', featureCount: 2 });
+    expect((none.content[0] as { text: string }).text).not.toContain('amazon-deal-features');
+    const text = (two.content[0] as { text: string }).text;
+    expect(text).toContain('<li>Small</li>');
+    expect(text).not.toContain('<li>Blue</li>');
+  });
+
   it('defaults retrievedAt to now when omitted (re-render safety)', async () => {
     const result = await runFormatItems(deps, { items: [ITEM], format: 'html-card' });
     const html = (result.content[0] as { text: string }).text;

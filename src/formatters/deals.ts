@@ -9,8 +9,9 @@
  * This format emits the `.amazon-deals-section` / `.amazon-deal-row` structure
  * instead, so the output inherits whatever the publishing template already
  * defines and drops into a post without restyling. The CSS is therefore NOT
- * emitted by default — pass `includeCss` for standalone use (a preview, or a
- * site that has not embedded the stylesheet yet).
+ * emitted by default — pass `includeCss` for standalone use (a site that has
+ * not embedded the stylesheet yet). `customStyles` is always emitted when set,
+ * so it can tweak the house CSS without dragging the full stylesheet along.
  *
  * Two things are deliberately absent:
  *
@@ -23,7 +24,7 @@
  *   dropped rather than rendered as zero stars.
  */
 import type { FormatterInput, FormatterOutput } from './types.js';
-import type { Item } from '../types/creators.js';
+import type { GetItemsResponse, GetVariationsResponse, SearchItemsResponse } from '../types/creators.js';
 import {
   AMAZON_DISCLOSURE,
   brand,
@@ -35,6 +36,7 @@ import {
   truncate,
 } from './helpers.js';
 import { extractItems } from './html.js';
+import { DEALS_CSS } from './deals-css.js';
 
 export interface DealsFormatterInput<T> extends FormatterInput<T> {
   /** Emit the stylesheet alongside the markup. Off by default — most destinations already define it. */
@@ -57,7 +59,9 @@ function starGlyphs(value: number): string {
   return '★'.repeat(full) + (half ? '☆' : '') + '·'.repeat(Math.max(0, 5 - full - (half ? 1 : 0)));
 }
 
-export function formatDealsSection<T>(input: DealsFormatterInput<T>): FormatterOutput<{ items: Item[] }> {
+export function formatDealsSection<
+  R extends SearchItemsResponse | GetItemsResponse | GetVariationsResponse,
+>(input: DealsFormatterInput<R>): FormatterOutput<R> {
   const {
     response,
     marketplace,
@@ -71,7 +75,7 @@ export function formatDealsSection<T>(input: DealsFormatterInput<T>): FormatterO
     featureCount = 0,
   } = input;
 
-  const all = extractItems(response as never);
+  const all = extractItems(response);
   const items = hideItemsWithoutPrice ? all.filter((i) => displayPrice(i) !== undefined) : all;
   const ts = retrievedAt ?? new Date().toISOString();
 
@@ -122,7 +126,9 @@ ${savings ? `      <span class="amazon-deal-savings">${esc(savings)}</span>\n` :
   </div>`;
   });
 
-  const css = includeCss ? `<style>\n${DEALS_CSS}${customStyles ? `\n${customStyles}\n` : ''}</style>\n` : '';
+  const userStyles = customStyles && customStyles.trim().length > 0 ? customStyles : '';
+  const cssBody = [includeCss ? DEALS_CSS : '', userStyles ? `${userStyles}\n` : ''].filter(Boolean).join('\n');
+  const css = cssBody ? `<style>\n${cssBody}</style>\n` : '';
   const headingHtml = heading ? `  <h3 class="amazon-deals-header">${esc(heading)}</h3>\n` : '';
 
   const text = `${css}<div class="amazon-deals-section">
@@ -130,7 +136,9 @@ ${headingHtml}${rows.join('\n')}
   <p class="amazon-deal-disclosure">${esc(AMAZON_DISCLOSURE)} Checked ${esc(readableDate(ts))}.</p>
 </div>`;
 
-  return { text, structured: { items } };
+  // Echo the original envelope (not the filtered items) so it can be passed
+  // straight back to `format_items`, like the other formats' output.
+  return { text, structured: response };
 }
 
 /**
@@ -142,7 +150,8 @@ ${headingHtml}${rows.join('\n')}
 function readableDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  // UTC, so the day matches the UTC timestamps the other formats show.
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 }
 
 function esc(s: string): string {
@@ -153,74 +162,3 @@ function esc(s: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
-
-/** Mirrors the canonical publishing template so standalone previews match production. */
-const DEALS_CSS = `.amazon-deals-section {
-  margin: 2rem 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
-.amazon-deals-header { font-size: 1.25rem; font-weight: 600; margin: 0 0 0.75rem; color: #232f3e; }
-.amazon-deal-row {
-  box-sizing: border-box;
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 1rem;
-  max-height: 70px;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d5d9d9;
-  border-radius: 2px;
-  margin-bottom: -1px;
-  background: #fff;
-  overflow: hidden;
-}
-.amazon-deal-row:hover { background: #fafafa; }
-.amazon-deal-image { display: flex; align-items: center; justify-content: center; height: 56px; }
-.amazon-deal-image img { max-width: 56px; max-height: 56px; width: auto; height: auto; object-fit: contain; }
-.amazon-deal-info { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
-.amazon-deal-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  margin: 0;
-  color: #007185;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.amazon-deal-brand { font-size: 0.8rem; color: #565959; }
-.amazon-deal-rating { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; }
-.amazon-stars { color: #ff9900; }
-.amazon-review-count { color: #565959; }
-.amazon-deal-features { display: none; }
-.amazon-deal-price {
-  display: grid;
-  grid-template-columns: auto auto;
-  align-items: center;
-  column-gap: 0.75rem;
-  row-gap: 0;
-  justify-items: end;
-}
-.amazon-price-amount { font-size: 1.05rem; font-weight: 700; color: #B12704; white-space: nowrap; }
-.amazon-deal-savings { font-size: 0.75rem; color: #007600; white-space: nowrap; grid-column: 1; }
-.amazon-buy-button {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  background-color: #ffd814;
-  color: #0F1111;
-  padding: 0.4rem 1rem;
-  border: 1px solid #fcd200;
-  border-radius: 3px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: none;
-  text-align: center;
-  white-space: nowrap;
-}
-.amazon-buy-button:hover { background-color: #f7ca00; }
-.amazon-deal-disclosure { font-size: 0.75rem; color: #565959; margin-top: 0.75rem; }
-@media (max-width: 640px) {
-  .amazon-deal-row { grid-template-columns: 48px minmax(0, 1fr); max-height: none; row-gap: 0.5rem; }
-  .amazon-deal-price { grid-column: 1 / -1; justify-items: start; }
-  .amazon-buy-button { grid-row: auto; }
-}
-`;
