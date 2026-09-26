@@ -208,9 +208,9 @@ Your credentials are tied to one region, and calling a marketplace outside it fa
 
 The four Amazon-facing tools all take:
 
-- **`format`** - `'json' | 'markdown' | 'html-card' | 'html-grid'` (default `markdown`; `get_browse_nodes` is `json | markdown` only)
+- **`format`** - `'json' | 'markdown' | 'html-card' | 'html-grid' | 'html-deals'` (default `markdown`; `get_browse_nodes` is `json | markdown` only)
 - **`resources`** - which fields to pull, as camelCase paths (`itemInfo.title`, `offersV2.listings.price`). Leave it off for a sensible default set.
-- **`customStyles`** - extra CSS tacked onto the built-in stylesheet when you're rendering HTML.
+- **`customStyles`** - extra CSS tacked onto the built-in stylesheet when you're rendering HTML. For `html-deals` it goes in its own `<style>` block ahead of the rows, so you can tweak your house styles without pulling in the full stylesheet.
 - **`titleMaxChars`** - cap the rendered title (default **80**). Amazon titles are often 150-plus characters of keyword soup, and 80 keeps a card to one line. Set `0` to turn it off. Markdown and JSON always get the full title.
 - **`hideItemsWithoutPrice`** - for `html-grid`, drop anything with no price (default **true**). A card with no price is a weak embed - no hook, nothing to click for. Set `false` if you're building a comparison table where you want the product shown regardless.
 
@@ -220,7 +220,7 @@ The four Amazon-facing tools all take:
 
 The formats below all produce a card that looks like a card. That's right for a one-off embed and wrong the moment you drop it into a post that already has house styling - you end up with somebody else's design sitting in the middle of your article.
 
-`html-deals` emits structural markup instead: `.amazon-deals-section` wrapping one `.amazon-deal-row` per product. If your theme already defines those classes, the output inherits them and there's nothing to restyle. If it doesn't, pass `includeCss: true` and you get a sensible default:
+`html-deals` emits structural markup instead: `.amazon-deals-section` wrapping one `.amazon-deal-row` per product. If your theme already defines those classes, the output inherits them and there's nothing to restyle. If it doesn't, re-render with `format_items` and `includeCss: true` and you get a sensible default:
 
 ![A row of three product deals - thumbnail, title, brand, price, savings and a View on Amazon button, in a compact 70px row](https://raw.githubusercontent.com/houtini-ai/amazon-creators-mcp/main/assets/deals-row-output.png)
 
@@ -228,7 +228,7 @@ The formats below all produce a card that looks like a card. That's right for a 
 Find me three burr coffee grinders and give me deal rows for the post
 ```
 
-Each row is a fixed 70px so ten products read as a scannable list rather than ten screens of scrolling. Feature bullets are off by default for the same reason - set `featureCount` if you want them, and unset the row's `max-height` in your own CSS to make room.
+Each row is a fixed 70px so ten products read as a scannable list rather than ten screens of scrolling. Feature bullets are off by default for the same reason - set `featureCount` on `format_items` if you want them, and unset the row's `max-height` in your own CSS to make room.
 
 Two things it will not print:
 

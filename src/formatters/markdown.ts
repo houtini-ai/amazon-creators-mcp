@@ -54,7 +54,11 @@ function renderItem(item: Item, marketplace: string, partnerTag: string, retriev
 
 function resolveTimestamp(retrievedAt: string | undefined): string {
   const raw = retrievedAt ?? new Date().toISOString();
-  return raw.replace(/\.\d{3}Z$/, 'Z');
+  // Normalise offsets to UTC: the visible text is labelled "UTC", and
+  // `format_items` accepts timestamps like `2026-04-16T09:00:00-07:00`.
+  const ms = Date.parse(raw);
+  if (Number.isNaN(ms)) return raw;
+  return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
 const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

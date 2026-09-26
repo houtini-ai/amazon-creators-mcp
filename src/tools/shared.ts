@@ -89,7 +89,7 @@ export const formatSchema = z
   .enum(FORMAT_OPTIONS)
   .default('markdown')
   .describe(
-    "Output format. DEFAULT TO 'markdown' OR 'json' when you plan to summarise the results in chat. Use 'html-card' / 'html-grid' ONLY when the user has explicitly asked for an embed, preview, card, widget, grid, or paste-ready HTML — these formats return a full HTML document the user pastes into their blog and are not for in-chat reading. 'markdown' = friendly summary source; 'json' = raw API data for programmatic use; 'html-card' = single product card; 'html-grid' = responsive grid of all items.",
+    "Output format. DEFAULT TO 'markdown' OR 'json' when you plan to summarise the results in chat. Use 'html-card' / 'html-grid' ONLY when the user has explicitly asked for an embed, preview, card, widget, grid, or paste-ready HTML — these formats return a full HTML document the user pastes into their blog and are not for in-chat reading. 'markdown' = friendly summary source; 'json' = raw API data for programmatic use; 'html-card' = single product card; 'html-grid' = responsive grid of all items; 'html-deals' = embeddable deals-row fragment (no <html> wrapper) that inherits the destination site's CSS.",
   );
 
 export const resourcesSchema = z
@@ -115,7 +115,7 @@ export const customStylesSchema = z
   .max(20_000, 'customStyles must be under 20,000 characters.')
   .optional()
   .describe(
-    "Extra CSS appended to the default stylesheet when format is 'html-card' or 'html-grid'. Target stable class-name anchors: .amzn-card, .amzn-card__image, .amzn-card__title, .amzn-card__meta, .amzn-card__brand, .amzn-card__rating, .amzn-card__price, .amzn-card__price--unavailable, .amzn-card__savings, .amzn-card__cta, .amzn-card__disclosure, .amzn-grid. Ignored for 'markdown' and 'json'.",
+    "Extra CSS appended to the default stylesheet when format is 'html-card' or 'html-grid'. Target stable class-name anchors: .amzn-card, .amzn-card__image, .amzn-card__title, .amzn-card__meta, .amzn-card__brand, .amzn-card__rating, .amzn-card__price, .amzn-card__price--unavailable, .amzn-card__savings, .amzn-card__cta, .amzn-card__disclosure, .amzn-grid. For 'html-deals' it is emitted in its own <style> block ahead of the fragment; target .amazon-deals-section, .amazon-deal-row, .amazon-deal-image, .amazon-deal-info, .amazon-deal-title, .amazon-deal-brand, .amazon-deal-rating, .amazon-deal-price, .amazon-price-amount, .amazon-deal-savings, .amazon-buy-button, .amazon-deal-disclosure. Ignored for 'markdown' and 'json'.",
   );
 
 /** Default title cap for HTML cards — one line on ~320px card width. */
@@ -136,6 +136,23 @@ export const hideItemsWithoutPriceSchema = z
   .optional()
   .describe(
     "When format is 'html-grid', drop items that have no price. Defaults to true — cards without a price are weak embeds (no deal hook, reader must click through to learn anything). Set false for comparison tables where availability can lapse but you still want the product visible. Ignored for 'html-card', 'markdown', and 'json'.",
+  );
+
+export const includeCssSchema = z
+  .boolean()
+  .optional()
+  .describe(
+    "When format is 'html-deals', emit the full deals stylesheet ahead of the fragment. Defaults to false — the fragment is meant to inherit the destination site's CSS. Turn on for a site that has not embedded the stylesheet yet. Ignored by other formats.",
+  );
+
+export const featureCountSchema = z
+  .number()
+  .int()
+  .min(0)
+  .max(10)
+  .optional()
+  .describe(
+    "When format is 'html-deals', how many feature bullets to show per row. Defaults to 0 — rows are a fixed height, so raise this only alongside customStyles that unset .amazon-deal-features { display: none } and the row's max-height. Ignored by other formats.",
   );
 
 export interface ToolDeps {
@@ -195,6 +212,10 @@ export interface RenderToolOutputArgs<TResponse extends ItemBearingResponse> {
   titleMaxChars?: number;
   /** html-grid only: drop items with no price. Defaults to true in the formatter. */
   hideItemsWithoutPrice?: boolean;
+  /** html-deals only: emit the deals stylesheet with the fragment. Defaults to false. */
+  includeCss?: boolean;
+  /** html-deals only: feature bullets per row. Defaults to 0. */
+  featureCount?: number;
   /** Markdown formatter specific to this tool's response envelope. */
   markdownFormatter: (i: FormatterInput<TResponse>) => FormatterOutput<TResponse>;
 }
@@ -221,6 +242,8 @@ export function renderToolOutput<TResponse extends ItemBearingResponse>(
     retrievedAt,
     titleMaxChars,
     hideItemsWithoutPrice,
+    includeCss,
+    featureCount,
     markdownFormatter,
   } = args;
   // Apply the default title cap here (not in the schema) so markdown / json
@@ -240,7 +263,7 @@ export function renderToolOutput<TResponse extends ItemBearingResponse>(
   if (format === 'json') return toMcpResult(formatJson(input));
   if (format === 'markdown') return toMcpResult(markdownFormatter(input));
 
-  if (format === 'html-deals') return toMcpResult(formatDealsSection(input));
+  if (format === 'html-deals') return toMcpResult(formatDealsSection({ ...input, includeCss, featureCount }));
 
   const out = format === 'html-card' ? formatHtmlCard(input) : formatHtmlGrid(input);
   return toMcpResult(out);

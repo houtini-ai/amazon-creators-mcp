@@ -4,6 +4,9 @@
  * Responsibilities:
  * - Global concurrency gate (AMAZON_MAX_CONCURRENCY).
  * - 429 handling: respects `Retry-After` header, pauses all in-flight requests.
+ *   Bounded: gives up after MAX_RATE_LIMIT_RETRIES, or at once when Amazon asks
+ *   for a wait longer than MAX_RETRY_AFTER_MS, so an exhausted quota fails the
+ *   call instead of hanging it (and its concurrency slot) indefinitely.
  * - 401 handling: force token refresh once, retry once.
  * - 5xx/network: one retry with 500 ms backoff.
  * - Logs via console.error (stdout is reserved for JSON-RPC).
@@ -31,6 +34,18 @@ function makeError(message: string, extras: Partial<CreatorsApiError> = {}): Cre
   const err = new Error(message) as CreatorsApiError;
   Object.assign(err, extras);
   return err;
+}
+
+/** How many 429s one call will wait out before failing. */
+const MAX_RATE_LIMIT_RETRIES = 3;
+/** Longest Retry-After we will sleep for; anything longer fails the call immediately. */
+const MAX_RETRY_AFTER_MS = 30_000;
+
+/** Retry budget carried through `dispatch` recursion for one call. */
+interface Attempt {
+  did401Refresh: boolean;
+  did5xxRetry: boolean;
+  rateLimitRetries: number;
 }
 
 /**
@@ -94,7 +109,11 @@ export class CreatorsApiClient {
     if (this.pauseUntil) await this.pauseUntil;
     await this.semaphore.acquire();
     try {
-      return await this.dispatch<TResponse>(op, payload, /* did401Refresh */ false, /* did5xxRetry */ false);
+      return await this.dispatch<TResponse>(op, payload, {
+        did401Refresh: false,
+        did5xxRetry: false,
+        rateLimitRetries: 0,
+      });
     } finally {
       this.semaphore.release();
     }
@@ -103,8 +122,7 @@ export class CreatorsApiClient {
   private async dispatch<TResponse>(
     op: Operation,
     payload: unknown,
-    did401Refresh: boolean,
-    did5xxRetry: boolean,
+    attempt: Attempt,
   ): Promise<TResponse> {
     const token = await this.tokens.getToken();
     const url = `${CREATORS_API_BASE}${PATHS[op]}`;
@@ -125,16 +143,25 @@ export class CreatorsApiClient {
         body: JSON.stringify(payload),
       });
     } catch (netErr) {
-      if (!did5xxRetry) {
+      if (!attempt.did5xxRetry) {
         if (this.config.debug) console.error(`[api] network error, retrying once: ${String(netErr)}`);
         await new Promise((r) => setTimeout(r, 500));
-        return this.dispatch<TResponse>(op, payload, did401Refresh, true);
+        return this.dispatch<TResponse>(op, payload, { ...attempt, did5xxRetry: true });
       }
       throw makeError(`Network error calling ${op}: ${String(netErr)}`);
     }
 
     if (res.status === 429) {
       const waitMs = parseRetryAfter(res.headers.get('retry-after'));
+      if (attempt.rateLimitRetries >= MAX_RATE_LIMIT_RETRIES || waitMs > MAX_RETRY_AFTER_MS) {
+        const body = await res.text().catch(() => '');
+        throw makeError(
+          `Rate limited by Amazon on ${op} (HTTP 429${
+            waitMs > MAX_RETRY_AFTER_MS ? `, Retry-After ${Math.ceil(waitMs / 1000)}s` : ''
+          }, gave up after ${attempt.rateLimitRetries} ${attempt.rateLimitRetries === 1 ? 'retry' : 'retries'}). Try again later.`,
+          { status: 429, body },
+        );
+      }
       if (this.config.debug) console.error(`[api] 429 rate-limited, pausing ${waitMs}ms`);
       // Globally pause: any future calls await the same promise until it resolves.
       const pausePromise = new Promise<void>((resolve) => setTimeout(resolve, waitMs));
@@ -143,16 +170,28 @@ export class CreatorsApiClient {
         if (this.pauseUntil === pausePromise) this.pauseUntil = null;
       });
       await pausePromise;
-      return this.dispatch<TResponse>(op, payload, did401Refresh, did5xxRetry);
+      return this.dispatch<TResponse>(op, payload, {
+        ...attempt,
+        rateLimitRetries: attempt.rateLimitRetries + 1,
+      });
     }
 
-    if (res.status === 401 && !did401Refresh) {
+    if (res.status === 401 && !attempt.did401Refresh) {
       if (this.config.debug) console.error(`[api] 401, invalidating token and retrying`);
       this.tokens.invalidate();
-      return this.dispatch<TResponse>(op, payload, true, did5xxRetry);
+      return this.dispatch<TResponse>(op, payload, { ...attempt, did401Refresh: true });
     }
 
     const text = await res.text();
+
+    // Retry before parsing: gateway 5xx pages (502/503) are usually HTML, and
+    // a parse failure must not skip the retry.
+    if (res.status >= 500 && !attempt.did5xxRetry) {
+      if (this.config.debug) console.error(`[api] ${res.status}, retrying once after 500ms`);
+      await new Promise((r) => setTimeout(r, 500));
+      return this.dispatch<TResponse>(op, payload, { ...attempt, did5xxRetry: true });
+    }
+
     let body: unknown;
     try {
       body = text === '' ? {} : JSON.parse(text);
@@ -166,12 +205,6 @@ export class CreatorsApiClient {
       throw makeError(`Non-JSON response from ${op}: ${text.slice(0, 300)}`, {
         status: res.status,
       });
-    }
-
-    if (res.status >= 500 && !did5xxRetry) {
-      if (this.config.debug) console.error(`[api] ${res.status}, retrying once after 500ms`);
-      await new Promise((r) => setTimeout(r, 500));
-      return this.dispatch<TResponse>(op, payload, did401Refresh, true);
     }
 
     if (!res.ok) {

@@ -9,8 +9,9 @@
  * This format emits the `.amazon-deals-section` / `.amazon-deal-row` structure
  * instead, so the output inherits whatever the publishing template already
  * defines and drops into a post without restyling. The CSS is therefore NOT
- * emitted by default — pass `includeCss` for standalone use (a preview, or a
- * site that has not embedded the stylesheet yet).
+ * emitted by default — pass `includeCss` for standalone use (a site that has
+ * not embedded the stylesheet yet). `customStyles` is always emitted when set,
+ * so it can tweak the house CSS without dragging the full stylesheet along.
  *
  * Two things are deliberately absent:
  *
@@ -23,7 +24,7 @@
  *   dropped rather than rendered as zero stars.
  */
 import type { FormatterInput, FormatterOutput } from './types.js';
-import type { Item } from '../types/creators.js';
+import type { GetItemsResponse, GetVariationsResponse, SearchItemsResponse } from '../types/creators.js';
 import {
   AMAZON_DISCLOSURE,
   brand,
@@ -58,7 +59,9 @@ function starGlyphs(value: number): string {
   return '★'.repeat(full) + (half ? '☆' : '') + '·'.repeat(Math.max(0, 5 - full - (half ? 1 : 0)));
 }
 
-export function formatDealsSection<T>(input: DealsFormatterInput<T>): FormatterOutput<{ items: Item[] }> {
+export function formatDealsSection<
+  R extends SearchItemsResponse | GetItemsResponse | GetVariationsResponse,
+>(input: DealsFormatterInput<R>): FormatterOutput<R> {
   const {
     response,
     marketplace,
@@ -72,7 +75,7 @@ export function formatDealsSection<T>(input: DealsFormatterInput<T>): FormatterO
     featureCount = 0,
   } = input;
 
-  const all = extractItems(response as never);
+  const all = extractItems(response);
   const items = hideItemsWithoutPrice ? all.filter((i) => displayPrice(i) !== undefined) : all;
   const ts = retrievedAt ?? new Date().toISOString();
 
@@ -123,7 +126,9 @@ ${savings ? `      <span class="amazon-deal-savings">${esc(savings)}</span>\n` :
   </div>`;
   });
 
-  const css = includeCss ? `<style>\n${DEALS_CSS}${customStyles ? `\n${customStyles}\n` : ''}</style>\n` : '';
+  const userStyles = customStyles && customStyles.trim().length > 0 ? customStyles : '';
+  const cssBody = [includeCss ? DEALS_CSS : '', userStyles ? `${userStyles}\n` : ''].filter(Boolean).join('\n');
+  const css = cssBody ? `<style>\n${cssBody}</style>\n` : '';
   const headingHtml = heading ? `  <h3 class="amazon-deals-header">${esc(heading)}</h3>\n` : '';
 
   const text = `${css}<div class="amazon-deals-section">
@@ -131,7 +136,9 @@ ${headingHtml}${rows.join('\n')}
   <p class="amazon-deal-disclosure">${esc(AMAZON_DISCLOSURE)} Checked ${esc(readableDate(ts))}.</p>
 </div>`;
 
-  return { text, structured: { items } };
+  // Echo the original envelope (not the filtered items) so it can be passed
+  // straight back to `format_items`, like the other formats' output.
+  return { text, structured: response };
 }
 
 /**
@@ -143,7 +150,8 @@ ${headingHtml}${rows.join('\n')}
 function readableDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  // UTC, so the day matches the UTC timestamps the other formats show.
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 }
 
 function esc(s: string): string {
