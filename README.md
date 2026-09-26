@@ -261,7 +261,7 @@ ASIN: `B0EXAMPLE01`
 > *As an Amazon Associate we earn from qualifying purchases. Prices and availability are accurate as of the time shown and are subject to change.*
 ```
 
-In Claude Desktop the card renders inline before you copy it, using the official MCP Apps protocol - a sandboxed preview so you're not pasting blind. On a host that doesn't do MCP Apps yet, you still get the HTML as plain text, which is the exact thing you paste anyway. Nothing lost.
+In Claude Desktop the card renders inline before you copy it, using the official MCP Apps protocol - a sandboxed preview so you're not pasting blind. The preview has a **Copy HTML** button that copies just the embeddable part: the `html-deals` fragment exactly as it is, or the `<style>` plus body markup of a card or grid, without the `<!doctype>`/`<html>` wrapper. On a host that doesn't do MCP Apps yet, you still get the HTML as plain text, which is the exact thing you paste anyway. Nothing lost.
 
 ---
 

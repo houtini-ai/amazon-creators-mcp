@@ -99,4 +99,9 @@ describe('MCP Apps registration', () => {
     // someone removes it thinking it's "legacy" (it isn't).
     expect(csp.resourceDomains).toContain('https://m.media-amazon.com');
   });
+
+  it('viewer contents request clipboard-write for the Copy HTML button', () => {
+    const { contents } = buildViewerContents('<!doctype html><html></html>');
+    expect(contents[0]!._meta.ui.permissions.clipboardWrite).toEqual({});
+  });
 });
