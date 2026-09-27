@@ -228,7 +228,7 @@ The formats below all produce a card that looks like a card. That's right for a 
 Find me three burr coffee grinders and give me deal rows for the post
 ```
 
-Each row is a fixed 70px so ten products read as a scannable list rather than ten screens of scrolling. Feature bullets are off by default for the same reason - set `featureCount` on `format_items` if you want them, and unset the row's `max-height` in your own CSS to make room.
+Each row is a fixed 70px so ten products read as a scannable list rather than ten screens of scrolling. Feature bullets are off by default for the same reason - set `featureCount` on `format_items` if you want them, and unset the row's `max-height` in your own CSS to make room. Want a title above the rows? Pass `heading` on `format_items` (*"add the heading 'Our top picks for 2026'"*) and you get an `<h3 class="amazon-deals-header">`.
 
 Two things it will not print:
 

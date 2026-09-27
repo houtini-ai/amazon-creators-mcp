@@ -155,6 +155,16 @@ export const featureCountSchema = z
     "When format is 'html-deals', how many feature bullets to show per row. Defaults to 0 — rows are a fixed height, so raise this only alongside customStyles that unset .amazon-deal-features { display: none } and the row's max-height. Ignored by other formats.",
   );
 
+export const headingSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(200, 'heading must be under 200 characters.')
+  .optional()
+  .describe(
+    "When format is 'html-deals', an <h3 class=\"amazon-deals-header\"> shown above the rows, e.g. \"Our top picks for 2026\". Omitted when unset. Ignored by other formats.",
+  );
+
 export interface ToolDeps {
   config: AppConfig;
   client: CreatorsApiClient;
@@ -216,6 +226,8 @@ export interface RenderToolOutputArgs<TResponse extends ItemBearingResponse> {
   includeCss?: boolean;
   /** html-deals only: feature bullets per row. Defaults to 0. */
   featureCount?: number;
+  /** html-deals only: heading above the rows. Omitted when unset. */
+  heading?: string;
   /** Markdown formatter specific to this tool's response envelope. */
   markdownFormatter: (i: FormatterInput<TResponse>) => FormatterOutput<TResponse>;
 }
@@ -244,6 +256,7 @@ export function renderToolOutput<TResponse extends ItemBearingResponse>(
     hideItemsWithoutPrice,
     includeCss,
     featureCount,
+    heading,
     markdownFormatter,
   } = args;
   // Apply the default title cap here (not in the schema) so markdown / json
@@ -263,7 +276,7 @@ export function renderToolOutput<TResponse extends ItemBearingResponse>(
   if (format === 'json') return toMcpResult(formatJson(input));
   if (format === 'markdown') return toMcpResult(markdownFormatter(input));
 
-  if (format === 'html-deals') return toMcpResult(formatDealsSection({ ...input, includeCss, featureCount }));
+  if (format === 'html-deals') return toMcpResult(formatDealsSection({ ...input, includeCss, featureCount, heading }));
 
   const out = format === 'html-card' ? formatHtmlCard(input) : formatHtmlGrid(input);
   return toMcpResult(out);
