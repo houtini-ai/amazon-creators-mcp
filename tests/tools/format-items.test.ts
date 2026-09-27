@@ -198,6 +198,19 @@ describe('runFormatItems', () => {
     expect(text).not.toContain('<li>Blue</li>');
   });
 
+  it('threads heading into html-deals output, escaped', async () => {
+    const none = await runFormatItems(deps, { items: [ITEM], format: 'html-deals' });
+    const withHeading = await runFormatItems(deps, {
+      items: [ITEM],
+      format: 'html-deals',
+      heading: 'Our top picks <2026>',
+    });
+    expect((none.content[0] as { text: string }).text).not.toContain('amazon-deals-header');
+    expect((withHeading.content[0] as { text: string }).text).toContain(
+      '<h3 class="amazon-deals-header">Our top picks &lt;2026&gt;</h3>',
+    );
+  });
+
   it('defaults retrievedAt to now when omitted (re-render safety)', async () => {
     const result = await runFormatItems(deps, { items: [ITEM], format: 'html-card' });
     const html = (result.content[0] as { text: string }).text;

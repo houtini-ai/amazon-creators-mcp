@@ -31,6 +31,7 @@ import {
   formatSchema,
   hideItemsWithoutPriceSchema,
   featureCountSchema,
+  headingSchema,
   includeCssSchema,
   renderToolOutput,
   titleMaxCharsSchema,
@@ -59,6 +60,7 @@ export const formatItemsShape = {
   hideItemsWithoutPrice: hideItemsWithoutPriceSchema,
   includeCss: includeCssSchema,
   featureCount: featureCountSchema,
+  heading: headingSchema,
   retrievedAt: z
     .string()
     .datetime({ offset: true })
@@ -104,6 +106,7 @@ export async function runFormatItems(deps: ToolDeps, input: FormatItemsInput) {
     hideItemsWithoutPrice: input.hideItemsWithoutPrice,
     includeCss: input.includeCss,
     featureCount: input.featureCount,
+    heading: input.heading,
     markdownFormatter: formatGetItemsMarkdown,
   });
 }
