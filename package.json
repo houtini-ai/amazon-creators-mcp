@@ -1,6 +1,6 @@
 {
   "name": "@houtini/amazon-creators-mcp",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Amazon Creators API MCP Server — blog-friendly affiliate product embeds rendered inline via MCP Apps.",
   "type": "module",
   "main": "./dist/index.js",
@@ -39,14 +39,14 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^22.10.0",
-    "@typescript-eslint/eslint-plugin": "^8.18.0",
-    "@typescript-eslint/parser": "^8.18.0",
+    "@types/node": "^26.6.5",
+    "@typescript-eslint/eslint-plugin": "^8.72.0",
+    "@typescript-eslint/parser": "^8.72.0",
     "@vitest/coverage-v8": "^2.1.9",
-    "esbuild": "^0.25.0",
-    "eslint": "^9.17.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.13.0",
     "msw": "^2.13.3",
-    "tsx": "^4.19.2",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.2",
     "vitest": "^2.1.9"
   },

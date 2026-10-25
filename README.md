@@ -1,6 +1,4 @@
 <div align="center">
-
-[![Socket Badge](https://socket.dev/api/badge/npm/package/@houtini/amazon-creators-mcp)](https://socket.dev/npm/package/@houtini/amazon-creators-mcp)
   <img src="https://raw.githubusercontent.com/houtini-ai/amazon-creators-mcp/main/assets/logo.png" width="120" height="120" alt="Amazon Creators MCP" />
 </div>
 
@@ -11,6 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Known Vulnerabilities](https://snyk.io/test/github/houtini-ai/amazon-creators-mcp/badge.svg)](https://snyk.io/test/github/houtini-ai/amazon-creators-mcp)
+[![Socket Badge](https://socket.dev/api/badge/npm/package/@houtini/amazon-creators-mcp)](https://socket.dev/npm/package/@houtini/amazon-creators-mcp)
 
 If you write product round-ups, you already know the boring part. You find the product on Amazon, copy the image, grab the price, paste your affiliate link, and hope the price hasn't moved by the time someone reads the post. Then you do it again for the next nine products.
 
