@@ -19,7 +19,7 @@
  * using esbuild; the output lives at `dist/mcp-apps/viewer.html` and is
  * served by `registerAppResource` at runtime.
  */
-import { App, PostMessageTransport } from '@modelcontextprotocol/ext-apps';
+import { App, PostMessageTransport } from '@modelcontextprotocol/ext-apps/app-with-deps';
 import { classifyOutput, extractEmbeddable, fragmentPreviewDoc } from './preview-doc.js';
 
 type ContentBlock = { type: string; text?: string } & Record<string, unknown>;

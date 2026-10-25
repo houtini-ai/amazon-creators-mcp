@@ -9,8 +9,9 @@
  * MCP Apps still receive the plain text content — which, for `html-card` /
  * `html-grid`, IS the HTML document the creator pastes into their blog.
  */
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/server';
 import { registerAppTool } from '@modelcontextprotocol/ext-apps/server';
+import { z } from 'zod';
 import { loadConfig } from './config/env.js';
 import { TokenCache } from './auth/token-cache.js';
 import { CreatorsApiClient } from './client/creators-api.js';
@@ -82,7 +83,7 @@ export function buildServer(): McpServer {
     SEARCH_ITEMS_TOOL_NAME,
     {
       description: SEARCH_ITEMS_DESCRIPTION,
-      inputSchema: searchItemsShape,
+      inputSchema: z.object(searchItemsShape),
       annotations: { readOnlyHint: true, openWorldHint: true },
       _meta: UI_META,
     },
@@ -100,7 +101,7 @@ export function buildServer(): McpServer {
     GET_ITEMS_TOOL_NAME,
     {
       description: GET_ITEMS_DESCRIPTION,
-      inputSchema: getItemsShape,
+      inputSchema: z.object(getItemsShape),
       annotations: { readOnlyHint: true, openWorldHint: true },
       _meta: UI_META,
     },
@@ -118,7 +119,7 @@ export function buildServer(): McpServer {
     GET_VARIATIONS_TOOL_NAME,
     {
       description: GET_VARIATIONS_DESCRIPTION,
-      inputSchema: getVariationsShape,
+      inputSchema: z.object(getVariationsShape),
       annotations: { readOnlyHint: true, openWorldHint: true },
       _meta: UI_META,
     },
@@ -139,7 +140,7 @@ export function buildServer(): McpServer {
     GET_BROWSE_NODES_TOOL_NAME,
     {
       description: GET_BROWSE_NODES_DESCRIPTION,
-      inputSchema: getBrowseNodesShape,
+      inputSchema: z.object(getBrowseNodesShape),
       annotations: { readOnlyHint: true, openWorldHint: true },
       _meta: UI_META,
     },
@@ -157,7 +158,7 @@ export function buildServer(): McpServer {
     FORMAT_ITEMS_TOOL_NAME,
     {
       description: FORMAT_ITEMS_DESCRIPTION,
-      inputSchema: formatItemsShape,
+      inputSchema: z.object(formatItemsShape),
       // Local re-render only — doesn't hit Amazon. Read-only but does not open the world.
       annotations: { readOnlyHint: true, openWorldHint: false },
       _meta: UI_META,

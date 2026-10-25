@@ -4,7 +4,7 @@
  *
  * Implementation lands in v0.1; see SCOPE.md for the plan.
  */
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { StdioServerTransport } from '@modelcontextprotocol/server/stdio';
 import { buildServer } from './server.js';
 
 async function main(): Promise<void> {

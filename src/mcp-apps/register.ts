@@ -26,7 +26,7 @@
  * same mechanism to whitelist its local media server origin. Verified working
  * in Claude Desktop as of 2026-04-16.
  */
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/server';
 import {
   registerAppResource,
   RESOURCE_MIME_TYPE,
