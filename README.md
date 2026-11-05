@@ -332,6 +332,8 @@ See [SCOPE.md](./SCOPE.md) for the architecture and the API quirks worth knowing
 
 ## Troubleshooting
 
+**Not sure whether the keys themselves work?** - test them outside the MCP server with [AMZ Scratchpad](https://amzscratchpad.com/), a free browser tool that talks to Amazon directly and checks the token, the API access and the partner tag one by one.
+
 **"Credential version rejected" on startup** - you're on v2.x Cognito credentials. Create a fresh Login with Amazon app in Associates Central → Creators API, then set `AMAZON_CREDENTIAL_VERSION` to `3.1`, `3.2` or `3.3` for your region.
 
 **401 or 403 errors** - usually one of two things. Either your Associates account doesn't have the 10 qualifying sales in the last 30 days, or Creators API access isn't switched on for the account yet. Both are checked in Associates Central.
